@@ -243,7 +243,7 @@ Underground forums หรือ Telegram มี:
 โอกาสสำเร็จ 40% เมื่อมีทรัพยากรพร้อม อีก 50% เป็นเรื่องของเทคนิคที่คุณจะใช้ และอีก 10% เป็นเรื่องของปัจจัยเสี่ยงที่ควบคุมเองไม่ได้ มีปัจจัยอีกมากมายที่ต้องเข้าใจ: BIN characteristics, Anti-fraud systems, VBV/MCSC, Chargeback risk, Geolocation matching, Browser fingerprinting, Analyze and predict the credit card holder's usage history เป็นต้น
 
 > นอกจากต้นทุนในการซื้อข้อมูล ยังมี: Proxy/VPN costs, Anti-detect browser subscriptions, Virtual phone numbers, Tools และ software, Drop addresses หรือ reshipping services, เวลาและความพยายามในการเรียนรู้ ผมเสียเงินกับสิ่งพวกนี้เกือบ 2 BTC ใน 1 พันวันสำหรับการเรียนรู้นอกตำราทั้งถูกหลอกลวง ความผิดพลาดของตัวเอง และอื่นๆ ลองคิดดูดีๆ ถ้าคุณจะตัดสินใจกับเรื่องพวกนี่ ในรูปคือบัญชี Binace ที่สรุปการเทรดทั้งหมดของผมในระยะเวลา 1 พันกว่าวันถึงปัจจุบัน
-![Binance](https://photos.app.goo.gl/uehYPW1PYWarp9qN7)
+![Binance](https://drive.google.com/file/d/1k7KXzZcoZ8msWPM8pYD1BOtn40CxOQ1x/view?usp=drivesdk)
 ### บทเรียนที่ 3: ความเสี่ยงทางกฎหมายมีจริง
 สิ่งที่ดูเหมือนเกมหรือความท้าทายทางเทคนิค แต่มีคนจริงที่ได้รับผลกระทบ และมีกฎหมายที่บังคับใช้จริง การถูกจับได้เกิดขึ้นบ่อยกว่าที่คิด โดยเฉพาะคนที่ประมาท OPSEC
 
