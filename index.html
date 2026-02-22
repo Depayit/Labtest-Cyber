@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Shadow Ledger OS - Threat Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chosen Palette: "Cyber Dark" - Deep Slate/Gray backgrounds (bg-slate-900), Emerald Green (text-emerald-400) for success/terminal text, Red/Orange for alerts, Indigo for AI components. -->
+    <!-- Application Structure Plan: A multi-tab dashboard (SPA) designed for threat analysts. The structure prioritizes functional simulation (Card Math -> Fraud Defense -> Threat Recon -> AI Analysis) allowing users to interact with concepts from 'The Shadow Ledger' directly. -->
+    <!-- Visualization & Content Choices: 
+         - Bar Chart (Chart.js): Shows the underground market value of compromised data (Logs vs Fullz).
+         - Interactive Forms: For Luhn validation and Anti-Fraud logic simulation.
+         - CSS/HTML Layouts: For the Swiss Cheese model and transaction flow.
+         - NO SVG/Mermaid used. Icons are FontAwesome webfonts. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        body {
+            font-family: 'Chakra Petch', sans-serif;
+            background-color: #0f172a; /* slate-900 */
+            color: #e2e8f0; /* slate-200 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            height: 350px;
+        }
+        .nav-item.active {
+            border-left: 4px solid #10b981; /* emerald-500 */
+            background-color: rgba(30, 41, 59, 0.8); /* slate-800 */
+            color: #10b981;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+        }
+        .terminal-text { font-family: monospace; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        .toggle-checkbox:checked { right: 0; border-color: #10b981; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #10b981; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden selection:bg-emerald-500 selection:text-white">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col z-20 shadow-2xl">
+        <div class="p-6 border-b border-slate-800 flex items-center gap-3">
+            <i class="fa-solid fa-shield-halved text-2xl text-emerald-500"></i>
+            <div>
+                <h1 class="text-lg font-bold text-white tracking-wider">SHADOW LEDGER</h1>
+                <p class="text-[10px] text-emerald-400 tracking-widest uppercase">OS v2.0 // J.Nuttapong</p>
+            </div>
+        </div>
+        
+        <nav class="flex-grow py-4">
+            <button onclick="switchView('dashboard')" class="nav-item active w-full flex items-center gap-3 px-6 py-4 text-sm font-medium text-slate-400 hover:text-emerald-400 hover:bg-slate-800/50 transition-all text-left">
+                <i class="fa-solid fa-gauge-high w-5"></i> Dashboard
+            </button>
+            <button onclick="switchView('card-system')" class="nav-item w-full flex items-center gap-3 px-6 py-4 text-sm font-medium text-slate-400 hover:text-emerald-400 hover:bg-slate-800/50 transition-all text-left">
+                <i class="fa-solid fa-credit-card w-5"></i> BIN & Card Analyzer
+            </button>
+            <button onclick="switchView('antifraud')" class="nav-item w-full flex items-center gap-3 px-6 py-4 text-sm font-medium text-slate-400 hover:text-emerald-400 hover:bg-slate-800/50 transition-all text-left">
+                <i class="fa-solid fa-network-wired w-5"></i> Anti-Fraud Simulator
+            </button>
+            <button onclick="switchView('underground')" class="nav-item w-full flex items-center gap-3 px-6 py-4 text-sm font-medium text-slate-400 hover:text-emerald-400 hover:bg-slate-800/50 transition-all text-left">
+                <i class="fa-solid fa-user-secret w-5"></i> Threat Economy
+            </button>
+            <button onclick="switchView('ai-hub')" class="nav-item w-full flex items-center gap-3 px-6 py-4 text-sm font-medium text-slate-400 hover:text-indigo-400 hover:bg-slate-800/50 transition-all text-left">
+                <i class="fa-solid fa-brain w-5"></i> AI Intelligence Hub
+            </button>
+        </nav>
+
+        <div class="p-4 border-t border-slate-800 text-xs text-slate-500 text-center">
+            <p><i class="fa-solid fa-triangle-exclamation text-yellow-500"></i> Educational Purpose Only</p>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow bg-slate-900 relative overflow-y-auto">
+        <!-- Background Grid Pattern -->
+        <div class="absolute inset-0 z-0 pointer-events-none" style="background-image: radial-gradient(#1e293b 1px, transparent 1px); background-size: 24px 24px; opacity: 0.3;"></div>
+
+        <div class="relative z-10 p-8 max-w-7xl mx-auto space-y-8">
+
+            <!-- 1. DASHBOARD VIEW -->
+            <section id="dashboard" class="view-section block animate-fade-in">
+                <header class="mb-8 border-b border-slate-800 pb-4">
+                    <h2 class="text-3xl font-bold text-white">System Overview</h2>
+                    <p class="text-slate-400 mt-2">ศูนย์กลางวิเคราะห์ภัยคุกคามทางการเงินและโครงสร้างตลาดมืด</p>
+                </header>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-blue-500">
+                        <div class="text-slate-400 text-xs uppercase tracking-wider mb-1">Monitored BINs</div>
+                        <div class="text-3xl font-bold text-white">12,450</div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-emerald-500">
+                        <div class="text-slate-400 text-xs uppercase tracking-wider mb-1">Active Fraud Nodes</div>
+                        <div class="text-3xl font-bold text-white">843</div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-orange-500">
+                        <div class="text-slate-400 text-xs uppercase tracking-wider mb-1">Global 3DS Adoption</div>
+                        <div class="text-3xl font-bold text-white">78.5%</div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-purple-500">
+                        <div class="text-slate-400 text-xs uppercase tracking-wider mb-1">AI Threat Score</div>
+                        <div class="text-3xl font-bold text-white">Critical</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Welcome Panel -->
+                    <div class="glass-panel p-8 rounded-xl relative overflow-hidden">
+                        <div class="absolute -right-10 -top-10 opacity-10 text-9xl">
+                            <i class="fa-solid fa-book-skull"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-4">ยินดีต้อนรับเข้าสู่ระบบ The Shadow Ledger</h3>
+                        <p class="text-slate-300 leading-relaxed text-sm mb-4">
+                            ระบบนี้ถูกสร้างขึ้นอ้างอิงจากบทความและคัมภีร์เจาะลึกระบบการเงินโลกใต้ดินโดย <strong>Jacob Nuttapong</strong> 
+                            จุดประสงค์เพื่อการศึกษา (Threat Emulation) และให้องค์กรต่างๆ เข้าใจถึง TTPs (Tactics, Techniques, and Procedures) 
+                            ที่ Carder ใช้ในการหลบหลีกระบบ Anti-Fraud
+                        </p>
+                        <ul class="space-y-2 text-sm text-slate-400">
+                            <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i> จำลองกลไกบัตรเครดิต & BIN</li>
+                            <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i> วิเคราะห์โครงสร้าง Swiss Cheese Model</li>
+                            <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i> บูรณาการ AI สำหรับงาน Cyber Intelligence</li>
+                        </ul>
+                    </div>
+
+                    <!-- Intro Chart -->
+                    <div class="glass-panel p-6 rounded-xl">
+                        <h3 class="text-lg font-bold text-white mb-4">มูลค่าข้อมูลในตลาดมืด (Dark Market Value)</h3>
+                        <div class="chart-container">
+                            <canvas id="dashboardChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. CARD & BIN ANALYZER -->
+            <section id="card-system" class="view-section hidden animate-fade-in">
+                <header class="mb-8 border-b border-slate-800 pb-4">
+                    <h2 class="text-3xl font-bold text-white">BIN & Card Analyzer</h2>
+                    <p class="text-slate-400 mt-2">ตรวจสอบโครงสร้าง ISO/IEC 7812 และ Luhn Algorithm Checksum</p>
+                </header>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Luhn Tool -->
+                    <div class="glass-panel p-6 rounded-xl border border-slate-700">
+                        <h3 class="font-bold text-white mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-calculator text-blue-400"></i> Luhn Checksum Generator/Validator
+                        </h3>
+                        <div class="mb-6">
+                            <input type="text" id="luhnInput" placeholder="กรอกเลขบัตร 16 หลัก (เช่น 4532...)" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-4 text-xl font-mono text-white focus:border-blue-500 focus:outline-none transition-colors" maxlength="19">
+                        </div>
+                        
+                        <div class="bg-slate-900 rounded-lg p-4 font-mono text-sm border border-slate-800 min-h-[150px]">
+                            <div id="luhnSteps" class="text-slate-400 mb-4 whitespace-pre-wrap terminal-text">>> รอรับข้อมูลบัตร...</div>
+                            <div id="luhnResult" class="text-lg font-bold"></div>
+                        </div>
+                    </div>
+
+                    <!-- BIN Information -->
+                    <div class="space-y-6">
+                        <div class="glass-panel p-6 rounded-xl border border-slate-700 relative overflow-hidden group">
+                            <div class="absolute right-0 top-0 w-32 h-32 bg-blue-500/10 rounded-bl-full -z-10 transition-transform group-hover:scale-110"></div>
+                            <h3 class="font-bold text-white mb-2 text-lg">โครงสร้าง BIN (Bank Identification Number)</h3>
+                            <p class="text-sm text-slate-400 mb-4">ตัวเลข 6-8 หลักแรกระบุประเภทบัตรและธนาคารผู้ออกบัตร ซึ่งมีความสำคัญในการทำ Digital Reconnaissance เพื่อดูว่าบัตรเป็นแบบ VBV หรือ Non-VBV</p>
+                            
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center p-3 bg-slate-800/50 rounded border border-slate-700">
+                                    <div class="flex items-center gap-3">
+                                        <span class="w-8 h-8 rounded bg-blue-900 text-blue-400 flex items-center justify-center font-bold">4</span>
+                                        <span class="text-sm font-medium">VISA</span>
+                                    </div>
+                                    <span class="text-xs text-slate-500">Banking & Financial</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-slate-800/50 rounded border border-slate-700">
+                                    <div class="flex items-center gap-3">
+                                        <span class="w-8 h-8 rounded bg-red-900 text-red-400 flex items-center justify-center font-bold">5</span>
+                                        <span class="text-sm font-medium">Mastercard</span>
+                                    </div>
+                                    <span class="text-xs text-slate-500">Banking & Financial</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-slate-800/50 rounded border border-slate-700">
+                                    <div class="flex items-center gap-3">
+                                        <span class="w-8 h-8 rounded bg-cyan-900 text-cyan-400 flex items-center justify-center font-bold">3</span>
+                                        <span class="text-sm font-medium">Amex</span>
+                                    </div>
+                                    <span class="text-xs text-slate-500">Travel & Entertainment</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="glass-panel p-6 rounded-xl border border-yellow-500/30 bg-yellow-500/5">
+                            <h4 class="font-bold text-yellow-500 mb-2 flex items-center gap-2">
+                                <i class="fa-solid fa-triangle-exclamation"></i> VBV vs Non-VBV Paradox
+                            </h4>
+                            <p class="text-sm text-slate-300 leading-relaxed">
+                                จากคัมภีร์ <em>"The Mechanics of BIN Security"</em> การมี BIN เดียวกันไม่ได้หมายความว่าระดับความปลอดภัยจะเหมือนกัน ขึ้นอยู่กับ Issuer ว่าเปิดใช้งาน 3D Secure (OTP) หรือไม่ สำหรับผู้โจมตี การหา BIN ที่เป็น Non-VBV คือเป้าหมายหลัก เพราะไม่ต้องผ่านด่านยืนยันตัวตน
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. ANTI-FRAUD SIMULATOR -->
+            <section id="antifraud" class="view-section hidden animate-fade-in">
+                <header class="mb-8 border-b border-slate-800 pb-4">
+                    <h2 class="text-3xl font-bold text-white">Anti-Fraud Simulator</h2>
+                    <p class="text-slate-400 mt-2">แบบจำลอง Swiss Cheese Model และระบบตรวจสอบของ Payment Gateway (เช่น Stripe)</p>
+                </header>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Controls -->
+                    <div class="glass-panel p-6 rounded-xl border border-slate-700 flex flex-col gap-6">
+                        <div>
+                            <h3 class="font-bold text-white mb-1">Layer Settings</h3>
+                            <p class="text-xs text-slate-400 mb-4">ปรับแต่งตัวแปรเพื่อจำลองการตรวจสอบธุรกรรม</p>
+                        </div>
+
+                        <!-- Check 1: IP & ZIP -->
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-2">Distance: IP to Billing ZIP</label>
+                            <input type="range" id="sim-distance" min="0" max="100" value="10" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" oninput="runFraudSimulation()">
+                            <div class="flex justify-between text-xs text-slate-500 mt-1">
+                                <span>Local (0km)</span>
+                                <span>Overseas (>5000km)</span>
+                            </div>
+                        </div>
+
+                        <!-- Check 2: Device / Fingerprint -->
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-2">Device Fingerprint Match</label>
+                            <select id="sim-device" class="w-full bg-slate-900 border border-slate-600 rounded p-2 text-sm text-white focus:outline-none focus:border-emerald-500" onchange="runFraudSimulation()">
+                                <option value="0">Clean (Known Device/Cookie)</option>
+                                <option value="40">Suspicious (Incognito/New)</option>
+                                <option value="80">Malicious (Anti-Detect Browser/VM)</option>
+                            </select>
+                        </div>
+
+                        <!-- Check 3: Velocity -->
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-2">Transaction Velocity</label>
+                            <input type="range" id="sim-velocity" min="1" max="10" value="2" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" oninput="runFraudSimulation()">
+                            <div class="flex justify-between text-xs text-slate-500 mt-1">
+                                <span>Normal (1/day)</span>
+                                <span>High (10/min)</span>
+                            </div>
+                        </div>
+
+                        <!-- Check 4: 3D Secure -->
+                        <div class="flex items-center justify-between mt-auto pt-4 border-t border-slate-700">
+                            <span class="text-sm font-medium text-slate-300">Enforce 3D Secure (OTP)</span>
+                            <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                                <input type="checkbox" name="toggle" id="sim-3ds" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 border-slate-600 appearance-none cursor-pointer transition-all duration-300 z-10" checked onchange="runFraudSimulation()"/>
+                                <label for="sim-3ds" class="toggle-label block overflow-hidden h-5 rounded-full bg-slate-600 cursor-pointer transition-colors duration-300"></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Visualization -->
+                    <div class="lg:col-span-2 glass-panel p-6 rounded-xl border border-slate-700 relative flex flex-col">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-bold text-white">Transaction Flow (Swiss Cheese Model)</h3>
+                            <div id="sim-final-status" class="px-4 py-1 rounded text-sm font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500">
+                                APPROVED
+                            </div>
+                        </div>
+
+                        <!-- The Nodes -->
+                        <div class="flex-grow flex items-center justify-between relative px-8 py-12">
+                            <!-- Connection Line -->
+                            <div class="absolute left-10 right-10 top-1/2 h-1 bg-slate-700 -translate-y-1/2 z-0"></div>
+                            <div id="sim-progress-line" class="absolute left-10 top-1/2 h-1 bg-emerald-500 -translate-y-1/2 z-0 transition-all duration-500" style="width: 100%;"></div>
+
+                            <!-- Start -->
+                            <div class="relative z-10 flex flex-col items-center gap-2">
+                                <div class="w-12 h-12 rounded-full bg-slate-800 border-2 border-slate-500 flex items-center justify-center text-white">
+                                    <i class="fa-solid fa-cart-shopping"></i>
+                                </div>
+                                <span class="text-xs font-bold text-slate-400">Checkout</span>
+                            </div>
+
+                            <!-- Node 1: Gateway Check -->
+                            <div class="relative z-10 flex flex-col items-center gap-2">
+                                <div id="node-1" class="w-16 h-16 rounded-lg bg-emerald-900/50 border-2 border-emerald-500 flex flex-col items-center justify-center text-emerald-400 transition-colors">
+                                    <i class="fa-solid fa-location-dot mb-1"></i>
+                                    <span class="text-[10px] font-bold">IP/GEO</span>
+                                </div>
+                            </div>
+
+                            <!-- Node 2: AI Risk -->
+                            <div class="relative z-10 flex flex-col items-center gap-2">
+                                <div id="node-2" class="w-16 h-16 rounded-lg bg-emerald-900/50 border-2 border-emerald-500 flex flex-col items-center justify-center text-emerald-400 transition-colors">
+                                    <i class="fa-solid fa-robot mb-1"></i>
+                                    <span class="text-[10px] font-bold">RADAR AI</span>
+                                </div>
+                            </div>
+
+                            <!-- Node 3: 3DS -->
+                            <div class="relative z-10 flex flex-col items-center gap-2">
+                                <div id="node-3" class="w-16 h-16 rounded-lg bg-emerald-900/50 border-2 border-emerald-500 flex flex-col items-center justify-center text-emerald-400 transition-colors">
+                                    <i class="fa-solid fa-mobile-screen mb-1"></i>
+                                    <span class="text-[10px] font-bold">3D SECURE</span>
+                                </div>
+                            </div>
+
+                            <!-- End (Bank) -->
+                            <div class="relative z-10 flex flex-col items-center gap-2">
+                                <div id="node-4" class="w-12 h-12 rounded-full bg-emerald-900/50 border-2 border-emerald-500 flex items-center justify-center text-emerald-400 transition-colors">
+                                    <i class="fa-solid fa-building-columns"></i>
+                                </div>
+                                <span class="text-xs font-bold text-slate-400">Issuer Bank</span>
+                            </div>
+                        </div>
+
+                        <!-- Analysis Output -->
+                        <div class="mt-auto bg-slate-900 p-4 rounded-lg border border-slate-700">
+                            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">System Log</h4>
+                            <ul id="sim-logs" class="text-sm font-mono text-slate-300 space-y-1">
+                                <!-- Logs injected via JS -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. THREAT ECONOMY & RECON -->
+            <section id="underground" class="view-section hidden animate-fade-in">
+                <header class="mb-8 border-b border-slate-800 pb-4">
+                    <h2 class="text-3xl font-bold text-white">Underground Economy & Recon</h2>
+                    <p class="text-slate-400 mt-2">วิเคราะห์โครงสร้างข้อมูลทางการเงินที่หลุดรอด (Fullz, Logs) และขั้นตอนการสอดแนม</p>
+                </header>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Terminology -->
+                    <div class="glass-panel p-6 rounded-xl border border-slate-700">
+                        <h3 class="font-bold text-white mb-4 text-lg border-b border-slate-700 pb-2">Dark Market Assets</h3>
+                        <div class="space-y-4">
+                            <div class="p-3 bg-slate-800/50 rounded border border-slate-700 hover:border-blue-500 transition-colors cursor-default">
+                                <h4 class="text-blue-400 font-bold mb-1">💳 CC Data (Basic)</h4>
+                                <p class="text-sm text-slate-400">ประกอบด้วย หมายเลขบัตร, วันหมดอายุ, CVV เป็นข้อมูลขั้นพื้นฐานที่สุด มักไม่สามารถผ่านระบบที่มี 3D Secure หรือ AI ตรวจจับพฤติกรรมได้</p>
+                            </div>
+                            <div class="p-3 bg-slate-800/50 rounded border border-slate-700 hover:border-purple-500 transition-colors cursor-default">
+                                <h4 class="text-purple-400 font-bold mb-1">📄 Fullz (Full Information)</h4>
+                                <p class="text-sm text-slate-400">ข้อมูลส่วนบุคคลครบชุด: ชื่อ, ที่อยู่, SSN, DOB, เบอร์โทรศัพท์, MMN ใช้สำหรับการทำ Identity Theft หรือสวมรอยตอบคำถามรักษาความปลอดภัย</p>
+                            </div>
+                            <div class="p-3 bg-slate-800/50 rounded border border-slate-700 hover:border-yellow-500 transition-colors cursor-default">
+                                <h4 class="text-yellow-500 font-bold mb-1">💻 Stealer Logs (The Holy Grail)</h4>
+                                <p class="text-sm text-slate-400">ข้อมูลดิบที่ดูดมาจากคอมพิวเตอร์เหยื่อโดยตรง ประกอบด้วย Cookies, Session IDs, Saved Passwords, และ Browser Fingerprint ทำให้หลอกระบบ Anti-Fraud ได้แนบเนียนที่สุด</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recon Checklist -->
+                    <div class="glass-panel p-6 rounded-xl border border-slate-700 flex flex-col">
+                        <h3 class="font-bold text-white mb-4 text-lg border-b border-slate-700 pb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-list-check text-orange-400"></i> Digital Recon Checklist
+                        </h3>
+                        <p class="text-sm text-slate-400 mb-4">อ้างอิงจาก <em>"Guide Digital Reconnaissance"</em> นี่คือสิ่งที่ผู้ไม่หวังดีจะตรวจสอบก่อนทำการโจมตี:</p>
+                        
+                        <div class="flex-grow space-y-3 overflow-y-auto pr-2">
+                            <label class="flex items-start gap-3 p-3 bg-slate-900 rounded border border-slate-700 cursor-pointer hover:bg-slate-800">
+                                <input type="checkbox" class="mt-1 w-4 h-4 rounded bg-slate-800 border-slate-600 text-emerald-500 focus:ring-emerald-500">
+                                <div>
+                                    <span class="text-sm font-bold text-white block">BIN Validation</span>
+                                    <span class="text-xs text-slate-500">ตรวจสอบฐานข้อมูล BIN ว่าเป็น VBV หรือไม่</span>
+                                </div>
+                            </label>
+                            <label class="flex items-start gap-3 p-3 bg-slate-900 rounded border border-slate-700 cursor-pointer hover:bg-slate-800">
+                                <input type="checkbox" class="mt-1 w-4 h-4 rounded bg-slate-800 border-slate-600 text-emerald-500 focus:ring-emerald-500">
+                                <div>
+                                    <span class="text-sm font-bold text-white block">Merchant Gateway Recon</span>
+                                    <span class="text-xs text-slate-500">ตรวจสอบว่าเว็บใช้เกตเวย์อะไร (เช่น Stripe, Shopify) เพื่อประเมินความเข้มงวด</span>
+                                </div>
+                            </label>
+                            <label class="flex items-start gap-3 p-3 bg-slate-900 rounded border border-slate-700 cursor-pointer hover:bg-slate-800">
+                                <input type="checkbox" class="mt-1 w-4 h-4 rounded bg-slate-800 border-slate-600 text-emerald-500 focus:ring-emerald-500">
+                                <div>
+                                    <span class="text-sm font-bold text-white block">Area Income matching (ZIP)</span>
+                                    <span class="text-xs text-slate-500">ค้นหารายได้เฉลี่ยของพื้นที่ตามรหัสไปรษณีย์ เพื่อกะยอดรูดบัตรให้สมจริง</span>
+                                </div>
+                            </label>
+                            <label class="flex items-start gap-3 p-3 bg-slate-900 rounded border border-slate-700 cursor-pointer hover:bg-slate-800">
+                                <input type="checkbox" class="mt-1 w-4 h-4 rounded bg-slate-800 border-slate-600 text-emerald-500 focus:ring-emerald-500">
+                                <div>
+                                    <span class="text-sm font-bold text-white block">IP & Proxy Setup</span>
+                                    <span class="text-xs text-slate-500">เตรียม RDP/Socks5 ให้ใกล้เคียงกับ Location ของเหยื่อมากที่สุด</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. AI INTELLIGENCE HUB -->
+            <section id="ai-hub" class="view-section hidden animate-fade-in">
+                <header class="mb-8 border-b border-slate-800 pb-4">
+                    <h2 class="text-3xl font-bold text-indigo-400">AI Intelligence Hub</h2>
+                    <p class="text-slate-400 mt-2">บูรณาการ Gemini LLM เพื่อการวิเคราะห์ทางไซเบอร์</p>
+                </header>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Tool 1: Risk Analyst -->
+                    <div class="glass-panel p-6 rounded-xl border border-indigo-900/50 bg-gradient-to-b from-indigo-900/10 to-transparent">
+                        <h3 class="font-bold text-white mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-microscope text-indigo-400"></i> AI Fraud Scenario Analyst
+                        </h3>
+                        <p class="text-sm text-slate-400 mb-4">พิมพ์สถานการณ์ธุรกรรมที่น่าสงสัย เพื่อให้ AI ประเมินว่าด่านป้องกันด่านไหนจะทำงาน (อ้างอิง Swiss Cheese)</p>
+                        
+                        <textarea id="ai-scenario-input" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-indigo-500 mb-3" placeholder="ตัวอย่าง: ใช้บัตรของคนอเมริกา สั่งซื้อคอมพิวเตอร์ผ่านเว็บไทย โดยใช้ IP Address จากรัสเซียตอนตี 3..."></textarea>
+                        
+                        <button onclick="analyzeRiskWithGemini()" id="btn-analyze-risk" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded transition-colors flex justify-center items-center gap-2">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> เริ่มการวิเคราะห์
+                        </button>
+
+                        <div id="ai-risk-result" class="mt-4 p-4 bg-slate-900 rounded-lg border border-slate-700 hidden text-sm text-slate-300 whitespace-pre-line leading-relaxed h-48 overflow-y-auto terminal-text"></div>
+                    </div>
+
+                    <!-- Tool 2: Dark Term Decoder -->
+                    <div class="glass-panel p-6 rounded-xl border border-indigo-900/50 bg-gradient-to-b from-indigo-900/10 to-transparent flex flex-col">
+                        <h3 class="font-bold text-white mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-code text-indigo-400"></i> Dark Web Terminology Decoder
+                        </h3>
+                        <p class="text-sm text-slate-400 mb-4">ถอดรหัสคำศัพท์แสลง หรือรูปแบบ Log ของกลุ่มแฮกเกอร์</p>
+                        
+                        <input type="text" id="ai-term-input" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm font-mono text-emerald-400 focus:outline-none focus:border-indigo-500 mb-3" placeholder="e.g., DROP, RDP/Socks5, CC Fullz, Cashout...">
+                        
+                        <button onclick="decodeTermWithGemini()" id="btn-decode-term" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded transition-colors flex justify-center items-center gap-2">
+                            <i class="fa-solid fa-terminal"></i> ถอดรหัส (Decode)
+                        </button>
+
+                        <div id="ai-term-result" class="mt-4 p-4 bg-slate-900 rounded-lg border border-slate-700 hidden text-sm text-slate-300 whitespace-pre-line leading-relaxed flex-grow overflow-y-auto terminal-text"></div>
+                    </div>
+                    
+                    <!-- Tool 3: Live Threat Web Scanner -->
+                    <div class="md:col-span-2 glass-panel p-6 rounded-xl border border-indigo-900/50 bg-gradient-to-b from-indigo-900/10 to-transparent">
+                        <h3 class="font-bold text-white mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-globe text-indigo-400"></i> Live Threat Web Scanner (Google Grounded AI)
+                        </h3>
+                        <p class="text-sm text-slate-400 mb-4">เชื่อมต่อ Google Search ผ่าน Gemini API เพื่ออัปเดตข่าวสาร ข้อมูลรั่วไหล (Data Breach) หรือเทคนิคภัยคุกคามล่าสุดในโลกใต้ดินแบบ Real-time</p>
+                        
+                        <div class="flex gap-3 mb-3 flex-col sm:flex-row">
+                            <input type="text" id="ai-search-input" class="flex-grow bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-indigo-500" value="อัปเดตข่าวหลุดข้อมูลบัตรเครดิตและเทคนิคการโกงล่าสุด (Carding/Data Breach) ปีนี้">
+                            <button onclick="scanLiveThreatsWithGemini()" id="btn-scan-threats" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors flex justify-center items-center gap-2 whitespace-nowrap">
+                                <i class="fa-solid fa-satellite-dish"></i> สแกนข้อมูลล่าสุด
+                            </button>
+                        </div>
+
+                        <div id="ai-search-result" class="mt-4 p-4 bg-slate-900 rounded-lg border border-slate-700 hidden text-sm text-slate-300 flex-col gap-4">
+                            <div id="search-text" class="whitespace-pre-line leading-relaxed terminal-text"></div>
+                            <div id="search-sources" class="border-t border-slate-700 pt-3 hidden">
+                                <h4 class="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-2">แหล่งข้อมูลอ้างอิง (Sources)</h4>
+                                <ul id="source-list" class="list-disc list-inside space-y-2 text-xs"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <script>
+        // --- Navigation Logic ---
+        function switchView(viewId) {
+            // Hide all
+            document.querySelectorAll('.view-section').forEach(el => {
+                el.classList.add('hidden');
+            });
+            // Show selected
+            document.getElementById(viewId).classList.remove('hidden');
+            
+            // Update nav active state
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+
+            // Handle specific view initializations
+            if(viewId === 'dashboard' && !window.chartRendered) {
+                renderDashboardChart();
+                window.chartRendered = true;
+            }
+        }
+
+        // --- View 1: Dashboard Chart (Chart.js) ---
+        function renderDashboardChart() {
+            const ctx = document.getElementById('dashboardChart').getContext('2d');
+            Chart.defaults.color = '#94a3b8'; // slate-400
+            Chart.defaults.font.family = "'Chakra Petch', sans-serif";
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['CC Data (Raw)', 'Fullz (ID)', 'Stealer Logs', 'Bank Login'],
+                    datasets: [{
+                        label: 'Estimated Value (USD)',
+                        data: [15, 30, 80, 200],
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.8)', // blue
+                            'rgba(168, 85, 247, 0.8)', // purple
+                            'rgba(234, 179, 8, 0.8)',  // yellow
+                            'rgba(239, 68, 68, 0.8)'   // red
+                        ],
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            grid: { color: 'rgba(51, 65, 85, 0.5)' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+        // Init chart on load
+        renderDashboardChart();
+        window.chartRendered = true;
+
+        // --- View 2: Luhn Logic ---
+        document.getElementById('luhnInput').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            let formattedValue = value.replace(/(.{4})/g, '$1 ').trim();
+            e.target.value = formattedValue;
+            
+            const display = document.getElementById('luhnSteps');
+            const resultBox = document.getElementById('luhnResult');
+            
+            if (value.length < 1) {
+                display.innerHTML = '>> รอรับข้อมูลบัตร...';
+                resultBox.innerHTML = '';
+                return;
+            }
+
+            const digits = value.split('').map(Number);
+            let sum = 0;
+            let log = '>> เริ่มการคำนวณ Checksum จากขวาไปซ้าย...\n';
+            
+            let isSecond = false;
+            for (let i = digits.length - 1; i >= 0; i--) {
+                let d = digits[i];
+                let orig = d;
+                if (isSecond) {
+                    d = d * 2;
+                    if (d > 9) d -= 9;
+                    log += `ตำแหน่งคู่: ${orig} * 2 = ${orig*2} -> ใช้ค่า ${d}\n`;
+                } else {
+                    log += `ตำแหน่งคี่: คงค่าเดิม = ${d}\n`;
+                }
+                sum += d;
+                isSecond = !isSecond;
+            }
+            log += `\n>> ผลรวมทั้งหมด (Sum): ${sum}`;
+            display.innerHTML = log;
+
+            if (sum % 10 === 0 && value.length >= 13) {
+                resultBox.innerHTML = '<span class="text-emerald-500"><i class="fa-solid fa-check-circle"></i> MOD 10 PASSED (โครงสร้างบัตรถูกต้อง)</span>';
+            } else if (value.length >= 13) {
+                resultBox.innerHTML = '<span class="text-red-500"><i class="fa-solid fa-times-circle"></i> INVALID (คำนวณไม่ลงตัว)</span>';
+            } else {
+                resultBox.innerHTML = '<span class="text-yellow-500">พิมพ์ตัวเลขให้ครบเพื่อตรวจสอบ...</span>';
+            }
+        });
+
+        // --- View 3: Anti-Fraud Simulator ---
+        function runFraudSimulation() {
+            const distance = parseInt(document.getElementById('sim-distance').value);
+            const device = parseInt(document.getElementById('sim-device').value);
+            const velocity = parseInt(document.getElementById('sim-velocity').value);
+            const use3ds = document.getElementById('sim-3ds').checked;
+
+            const logs = document.getElementById('sim-logs');
+            const statusBox = document.getElementById('sim-final-status');
+            const nodes = [
+                document.getElementById('node-1'),
+                document.getElementById('node-2'),
+                document.getElementById('node-3'),
+                document.getElementById('node-4')
+            ];
+            const line = document.getElementById('sim-progress-line');
+
+            logs.innerHTML = '';
+            let failedAt = -1;
+            let score = 0;
+
+            // Reset Nodes
+            nodes.forEach(n => {
+                n.className = "w-16 h-16 rounded-lg bg-emerald-900/50 border-2 border-emerald-500 flex flex-col items-center justify-center text-emerald-400 transition-colors";
+            });
+            nodes[3].className = "w-12 h-12 rounded-full bg-emerald-900/50 border-2 border-emerald-500 flex items-center justify-center text-emerald-400 transition-colors"; // Bank node shape
+
+            function addLog(text, isAlert = false) {
+                const li = document.createElement('li');
+                li.innerHTML = isAlert ? `<span class="text-red-400">[!] ${text}</span>` : `[+] ${text}`;
+                logs.appendChild(li);
+            }
+
+            // Step 1: IP/GEO Check
+            addLog("Checking IP Distance vs Billing ZIP...");
+            if (distance > 70) {
+                score += 40;
+                addLog("High risk: Transaction origin is far from billing address.", true);
+            } else {
+                addLog("IP Distance acceptable.");
+            }
+
+            // Step 2: AI Radar / Velocity / Device
+            addLog("Executing Behavioral AI Analysis...");
+            if (device === 80) {
+                score += 80;
+                addLog("CRITICAL: Anti-Detect browser / VM signature detected!", true);
+            } else if (device === 40) {
+                score += 30;
+                addLog("Warning: Unrecognized device footprint.");
+            }
+            
+            if (velocity > 7) {
+                score += 40;
+                addLog("High risk: Velocity check failed (Card stuffing pattern).", true);
+            }
+
+            // Evaluation
+            if (score > 80) {
+                // Fails at AI node
+                failedAt = 1; // node-2 index
+                statusBox.innerHTML = 'DECLINED (AI BLOCK)';
+                statusBox.className = 'px-4 py-1 rounded text-sm font-bold bg-red-500/20 text-red-500 border border-red-500';
+            } else {
+                // Passes AI, reaches 3DS
+                if (use3ds) {
+                    addLog("3D Secure Required by Merchant Gateway.");
+                    // Simulate 3DS challenge - attackers without fullz/phone will fail
+                    if(score > 30) {
+                         addLog("3DS Challenge Triggered due to medium risk. OTP Sent.", true);
+                         addLog("OTP Timeout / Failed. Transaction aborted.", true);
+                         failedAt = 2; // node-3
+                         statusBox.innerHTML = 'DECLINED (3DS FAIL)';
+                         statusBox.className = 'px-4 py-1 rounded text-sm font-bold bg-red-500/20 text-red-500 border border-red-500';
+                    } else {
+                         addLog("Low risk: Frictionless 3DS flow granted.");
+                    }
+                } else {
+                    addLog("Merchant is Non-VBV. Bypassing 3DS challenge.", true);
+                }
+            }
+
+            // Update Visuals
+            if (failedAt === -1) {
+                // Success
+                addLog("Transaction forwarded to Issuer Bank -> APPROVED.");
+                statusBox.innerHTML = 'APPROVED';
+                statusBox.className = 'px-4 py-1 rounded text-sm font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500';
+                line.style.width = '100%';
+                line.className = "absolute left-10 top-1/2 h-1 bg-emerald-500 -translate-y-1/2 z-0 transition-all duration-500";
+            } else {
+                // Visual failure
+                for(let i=0; i<=failedAt; i++) {
+                    if(i === failedAt) {
+                        nodes[i].classList.remove('bg-emerald-900/50', 'border-emerald-500', 'text-emerald-400');
+                        nodes[i].classList.add('bg-red-900/50', 'border-red-500', 'text-red-500', 'animate-pulse');
+                    }
+                }
+                // Dim rest
+                for(let i=failedAt+1; i<nodes.length; i++) {
+                    nodes[i].classList.add('opacity-30', 'grayscale');
+                }
+                
+                // Adjust line
+                const percentage = (failedAt + 1) * 25;
+                line.style.width = `${percentage}%`;
+                line.className = "absolute left-10 top-1/2 h-1 bg-red-500 -translate-y-1/2 z-0 transition-all duration-500";
+            }
+        }
+        
+        // Initial run
+        setTimeout(runFraudSimulation, 500);
+
+        // --- View 5: Gemini API Logic ---
+        const apiKey = ""; // API Key provided by environment
+        
+        async function callGemini(prompt, sysInstruction) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                systemInstruction: { parts: [{ text: sysInstruction }] }
+            };
+
+            for (let i = 0; i < 5; i++) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        return data.candidates[0].content.parts[0].text;
+                    }
+                } catch (e) {
+                    await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000));
+                }
+            }
+            return "System Error: Unable to reach AI core.";
+        }
+
+        async function analyzeRiskWithGemini() {
+            const input = document.getElementById('ai-scenario-input').value.trim();
+            const btn = document.getElementById('btn-analyze-risk');
+            const resultBox = document.getElementById('ai-risk-result');
+
+            if(!input) return;
+
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+            btn.disabled = true;
+            resultBox.classList.remove('hidden');
+            resultBox.innerHTML = '<span class="text-indigo-400 animate-pulse">Running heuristic analysis via Gemini...</span>';
+
+            const sys = "You are an expert Anti-Fraud AI system analyzer. The user provides a transaction scenario. Assess: 1. Overall Risk (Low/Medium/High). 2. Which layer of the Swiss Cheese model (IP, Device, AI, 3DS) will likely catch it. 3. Brief technical explanation. Respond strictly in Thai, professional tone, formatting with markdown bolding.";
+            
+            const res = await callGemini(input, sys);
+            
+            resultBox.innerHTML = res.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>').replace(/\n/g, '<br>');
+            btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> เริ่มการวิเคราะห์';
+            btn.disabled = false;
+        }
+
+        async function decodeTermWithGemini() {
+            const input = document.getElementById('ai-term-input').value.trim();
+            const btn = document.getElementById('btn-decode-term');
+            const resultBox = document.getElementById('ai-term-result');
+
+            if(!input) return;
+
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Decoding...';
+            btn.disabled = true;
+            resultBox.classList.remove('hidden');
+            resultBox.innerHTML = '<span class="text-emerald-400 animate-pulse">Querying Dark Web knowledge base...</span>';
+
+            const sys = "You are a Cyber Threat Intelligence Analyst. User provides a dark web/carding term (e.g. Fullz, DROP, RDP). Provide: 1. Definition. 2. How it's used in attacks. 3. Defensive measure against it. Respond strictly in Thai, analytical tone, format with markdown.";
+            
+            const res = await callGemini(input, sys);
+            
+            resultBox.innerHTML = res.replace(/\*\*(.*?)\*\*/g, '<strong class="text-emerald-300">$1</strong>').replace(/\n/g, '<br>');
+            btn.innerHTML = '<i class="fa-solid fa-terminal"></i> ถอดรหัส (Decode)';
+            btn.disabled = false;
+        }
+
+        async function scanLiveThreatsWithGemini() {
+            const input = document.getElementById('ai-search-input').value.trim();
+            const btn = document.getElementById('btn-scan-threats');
+            const resultBox = document.getElementById('ai-search-result');
+            const textDiv = document.getElementById('search-text');
+            const sourcesDiv = document.getElementById('search-sources');
+            const sourceList = document.getElementById('source-list');
+
+            if(!input) return;
+
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังสแกน...';
+            btn.disabled = true;
+            resultBox.classList.remove('hidden');
+            sourcesDiv.classList.add('hidden');
+            textDiv.innerHTML = '<span class="text-blue-400 animate-pulse">Connecting to Google Search via Gemini API...</span>';
+
+            const sys = "คุณคือนักวิเคราะห์ข่าวกรองภัยคุกคาม (Cyber Threat Intelligence Analyst) ค้นหาและสรุปข่าวสารข้อมูลที่สดใหม่ที่สุดจากอินเทอร์เน็ตตามคำค้นหาของผู้ใช้ เน้นเกี่ยวกับ Cybersecurity, ข้อมูลการเงินรั่วไหล, และตลาดมืด ตอบเป็นภาษาไทย สรุปสถานการณ์เป็นข้อๆ ให้กระชับและน่าสนใจ";
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const payload = {
+                contents: [{ parts: [{ text: input }] }],
+                systemInstruction: { parts: [{ text: sys }] },
+                tools: [{ google_search: {} }] // Enable Google Search Grounding
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "ไม่พบข้อมูลอัปเดตในขณะนี้";
+
+                    // Format text
+                    textDiv.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>').replace(/\n/g, '<br>');
+
+                    // Extract sources
+                    const attributions = data.candidates?.[0]?.groundingMetadata?.groundingAttributions;
+                    if (attributions && attributions.length > 0) {
+                        sourceList.innerHTML = '';
+                        const uniqueUris = new Set();
+                        attributions.forEach(attr => {
+                            const uri = attr.web?.uri;
+                            const title = attr.web?.title;
+                            if (uri && title && !uniqueUris.has(uri)) {
+                                uniqueUris.add(uri);
+                                const li = document.createElement('li');
+                                li.innerHTML = `<a href="${uri}" target="_blank" class="text-blue-400 hover:text-blue-300 underline"><i class="fa-solid fa-link mr-1"></i> ${title}</a>`;
+                                sourceList.appendChild(li);
+                            }
+                        });
+                        if(uniqueUris.size > 0) {
+                            sourcesDiv.classList.remove('hidden');
+                        }
+                    }
+                } else {
+                    textDiv.innerHTML = `<span class="text-red-500">API Error: ไม่สามารถเชื่อมต่อระบบค้นหาได้ (${response.status})</span>`;
+                }
+            } catch (e) {
+                textDiv.innerHTML = `<span class="text-red-500">System Error: ${e.message}</span>`;
+            }
+
+            btn.innerHTML = '<i class="fa-solid fa-satellite-dish"></i> สแกนข้อมูลล่าสุด';
+            btn.disabled = false;
+        }
+
+    </script>
+</body>
+</html>
