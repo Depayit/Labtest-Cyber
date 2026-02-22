@@ -1,6 +1,6 @@
 # 💳 Carding Infrastructure Lab
 
-## 🏅 2 ด้าน: Cybercrime
+## 🏅 เหรียญ 2 ด้าน: Cybercrime
 ### 🚀 บทนำ: จุดเริ่มต้นของการเดินทาง
 **แรงบันดาลใจ ประสบการณ์การเรียนรู้ด้าน Cybersecurity และ Cybercrime**
 
